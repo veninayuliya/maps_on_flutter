@@ -53,3 +53,7 @@ IDE (jika Anda menggunakannya) akan menampilkan beberapa garis bergelombang mera
 ### Menjalankan aplikasi
 
 <img src="images/13.jpg" width="330">
+
+## Tugas
+
+![](images/tugas.jpg)

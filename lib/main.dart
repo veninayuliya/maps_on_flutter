@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'src/locations.dart' as locations;
@@ -14,23 +16,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final Map<String, Marker> _markers = {};
-  Future<void> _onMapCreated(GoogleMapController controller) async {
-    final googleOffices = await locations.getGoogleOffices();
-    setState(() {
-      _markers.clear();
-      for (final office in googleOffices.offices) {
-        final marker = Marker(
-          markerId: MarkerId(office.name),
-          position: LatLng(office.lat, office.lng),
-          infoWindow: InfoWindow(
-            title: office.name,
-            snippet: office.address,
-          ),
-        );
-        _markers[office.name] = marker;
-      }
-    });
+  final Completer<GoogleMapController> _controller = Completer();
+  late LatLng currentLatLng = const LatLng(-7.687855, 112.719367);
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
@@ -38,45 +29,29 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Google Office Locations'),
+          title: const Text('Google Maps Flutter'),
           backgroundColor: Colors.green[700],
         ),
         body: GoogleMap(
-          onMapCreated: _onMapCreated,
-          initialCameraPosition: const CameraPosition(
-            target: LatLng(0, 0),
-            zoom: 2,
+          onMapCreated: (GoogleMapController controller) {
+            _controller.complete(controller);
+          },
+          initialCameraPosition: CameraPosition(
+            target: currentLatLng,
+            zoom: 15,
           ),
-          markers: _markers.values.toSet(),
+          markers: <Marker>{
+            Marker(
+                markerId: const MarkerId("1"),
+                position: currentLatLng,
+                icon: BitmapDescriptor.defaultMarker,
+                infoWindow: const InfoWindow(
+                  title: 'Location',
+                  snippet: 'Mojotengah, Sukorejo',
+                ))
+          },
         ),
       ),
     );
   }
-}
-
-late GoogleMapController mapController;
-
-final LatLng _center = const LatLng(45.521563, -122.677433);
-
-void _onMapCreated(GoogleMapController controller) {
-  mapController = controller;
-}
-
-@override
-Widget build(BuildContext context) {
-  return MaterialApp(
-    home: Scaffold(
-      appBar: AppBar(
-        title: const Text('Maps Sample App'),
-        backgroundColor: Colors.green[700],
-      ),
-      body: GoogleMap(
-        onMapCreated: _onMapCreated,
-        initialCameraPosition: CameraPosition(
-          target: _center,
-          zoom: 11.0,
-        ),
-      ),
-    ),
-  );
 }
